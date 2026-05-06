@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OsiTech Smart Repair – Mehr als nur Reparatur</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070711;
+      --surface:   #0f0f1e;
+      --card:      rgba(255,255,255,0.04);
+      --border:    rgba(255,255,255,0.08);
+      --blue:      #00c8ff;
+      --purple:    #7b2fff;
+      --gradient:  linear-gradient(135deg, #00c8ff 0%, #7b2fff 100%);
+      --text:      #e8e8f0;
+      --muted:     #8888aa;
+      --radius:    14px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── Scrollbar ────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
+
+    /* ─── Noise Texture Overlay ───────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Nav ──────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 5%;
+      background: rgba(7,7,17,0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-logo .icon {
+      width: 36px; height: 36px;
+      background: var(--gradient);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+
+    .nav-logo span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--muted);
+      transition: color var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 2px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transition: transform var(--transition);
+      border-radius: 1px;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-cta {
+      padding: 0.5rem 1.2rem;
+      background: var(--gradient);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff !important;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .burger span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* ─── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 5% 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated gradient blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.18;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .blob-1 { width: 500px; height: 500px; background: var(--blue);  top: -10%; left: -10%; animation-duration: 14s; }
+    .blob-2 { width: 400px; height: 400px; background: var(--purple); bottom: 0; right: -10%; animation-duration: 10s; animation-delay: -5s; }
+    .blob-3 { width: 300px; height: 300px; background: var(--blue);   bottom: 20%; left: 30%; animation-duration: 16s; animation-delay: -8s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* Grid lines background */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: rgba(0,200,255,0.1);
+      border: 1px solid rgba(0,200,255,0.2);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: var(--blue);
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--blue);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.2rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    h1 .gradient-text {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      padding: 0.85rem 2rem;
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 0 30px rgba(0,200,255,0.25);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.88;
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(0,200,255,0.4);
+    }
+
+    .btn-secondary {
+      padding: 0.85rem 2rem;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--blue);
+      background: rgba(0,200,255,0.06);
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-top: 4rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 2rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); }
+
+    /* ─── Section Wrapper ──────────────────────────────────────── */
+    section { padding: 5rem 5%; position: relative; z-index: 1; }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .section-intro {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 540px;
+    }
+
+    .section-head { margin-bottom: 3rem; }
+
+    /* ─── Services ─────────────────────────────────────────────── */
+    #services { background: var(--surface); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .service-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .service-card:hover {
+      border-color: rgba(0,200,255,0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,200,255,0.1);
+    }
+
+    .service-card:hover::before { opacity: 0.04; }
+
+    .service-icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: var(--gradient);
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Why Us ───────────────────────────────────────────────── */
+    .usp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .usp-list { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .usp-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .usp-icon {
+      flex-shrink: 0;
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(0,200,255,0.1);
+      border: 1px solid rgba(0,200,255,0.15);
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      margin-top: 2px;
+    }
+
+    .usp-item h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .usp-item p  { font-size: 0.88rem; color: var(--muted); }
+
+    .usp-visual {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .usp-visual::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: conic-gradient(from 0deg at 50% 50%, transparent 60%, rgba(0,200,255,0.06) 65%, transparent 70%);
+      animation: spin 12s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .usp-visual .big-icon {
+      font-size: 5rem;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 20px rgba(0,200,255,0.4));
+    }
+
+    .usp-visual p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .usp-visual strong {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: 0.3rem;
+    }
+
+    /* ─── Repair Steps ─────────────────────────────────────────── */
+    #process { background: var(--surface); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: var(--gradient);
+      opacity: 0.3;
+    }
+
+    .step {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .step-num {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1.2rem;
+      font-size: 1.5rem;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 0 2px transparent;
+    }
+
+    .step-num::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: var(--gradient);
+      z-index: -1;
+    }
+
+    .step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .step p  { font-size: 0.85rem; color: var(--muted); }
+
+    /* ─── Repair Form ──────────────────────────────────────────── */
+    .form-wrapper {
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    input, textarea, select {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+    }
+
+    input::placeholder, textarea::placeholder { color: rgba(136,136,170,0.5); }
+
+    select option { background: #1a1a2e; }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    .form-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 0 30px rgba(0,200,255,0.2);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+      box-shadow: 0 0 50px rgba(0,200,255,0.35);
+    }
+
+    /* ─── Contact ──────────────────────────────────────────────── */
+    #contact { background: var(--surface); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .contact-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color var(--transition), transform var(--transition);
+      margin-bottom: 1rem;
+    }
+
+    .contact-card:hover {
+      border-color: rgba(0,200,255,0.3);
+      transform: translateX(4px);
+    }
+
+    .contact-card-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--gradient);
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .contact-card h4 { font-size: 0.8rem; color: var(--muted); font-weight: 600; margin-bottom: 0.2rem; }
+    .contact-card p  { font-size: 1rem; font-weight: 600; }
+
+    .map-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      height: 320px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .map-box svg {
+      width: 80px; height: 80px;
+      opacity: 0.2;
+    }
+
+    .map-placeholder {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .map-placeholder strong {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .map-link {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1.4rem;
+      background: var(--gradient);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      display: inline-block;
+      transition: opacity var(--transition);
+    }
+
+    .map-link:hover { opacity: 0.85; }
+
+    /* ─── Footer ───────────────────────────────────────────────── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 3rem 5%;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .footer-logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a { color: var(--muted); transition: color var(--transition); }
+    .footer-links a:hover { color: var(--blue); }
+
+    /* ─── Toast ────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1a2a1a;
+      border: 1px solid #2a5a2a;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      color: #6fcf6f;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── Animations ───────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        background: rgba(7,7,17,0.97);
+        padding: 1.5rem 5%;
+        border-bottom: 1px solid var(--border);
+        gap: 1.2rem;
+      }
+      .burger { display: flex; }
+      .usp-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero-stats { gap: 1.5rem; }
+      .steps-grid::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Nav ─────────────────────────────────────────────────── -->
+  <nav id="navbar">
+    <div class="nav-logo">
+      <div class="icon">🔧</div>
+      <span>OsiTech</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#services">Leistungen</a></li>
+      <li><a href="#whyus">Über uns</a></li>
+      <li><a href="#process">Ablauf</a></li>
+      <li><a href="#repair">Anfrage</a></li>
+      <li><a href="#contact">Kontakt</a></li>
+      <li><a href="tel:01575644106" class="nav-cta">📞 Anrufen</a></li>
+    </ul>
+    <div class="burger" id="burger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ─────────────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Rhede · Deichstraße 5 · Persönliche Beratung
+      </div>
+
+      <h1>
+        Dein Gerät.<br>
+        <span class="gradient-text">Repariert. Schnell.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Mehr als nur Reparatur – Beratung, Ankauf &amp; Zubehör inklusive.
+        Kleine, inhabergeführte Werkstatt mit echter Leidenschaft für Qualität.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('repair').scrollIntoView({behavior:'smooth'})">
+          Reparaturanfrage stellen
+        </button>
+        <button class="btn-secondary" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
+          Leistungen entdecken
+        </button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Transparenz</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">Sofort</div>
+          <div class="stat-label">Diagnose</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">Fair</div>
+          <div class="stat-label">Preise</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">∞</div>
+          <div class="stat-label">Beratung</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Services ─────────────────────────────────────────────── -->
+  <section id="services">
+    <div class="section-head reveal">
+      <span class="section-label">Leistungen</span>
+      <h2>Was wir für dich reparieren</h2>
+      <p class="section-intro">Ob Display, Akku oder Software – wir kümmern uns um dein Gerät mit Erfahrung und Sorgfalt.</p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon">📱</div>
+        <h3>Display­reparatur</h3>
+        <p>Gebrochene oder defekte Displays werden professionell und schnell ausgetauscht – mit Qualitätsteilen.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🔋</div>
+        <h3>Akkuwechsel</h3>
+        <p>Kurze Akkulaufzeit? Wir tauschen deinen Akku aus und dein Gerät hält wieder den ganzen Tag durch.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🔌</div>
+        <h3>Ladebuchsen­reparatur</h3>
+        <p>Defekte Ladeanschlüsse reparieren wir fachgerecht – damit du wieder zuverlässig laden kannst.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">💻</div>
+        <h3>Software­probleme</h3>
+        <p>Abstürze, Fehler, langsames System – wir diagnostizieren und beheben Software-Bugs aller Art.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📦</div>
+        <h3>Ankauf &amp; Verkauf</h3>
+        <p>Wir kaufen geprüfte Gebrauchtgeräte an und bieten dir faire Preise – transparent und unkompliziert.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🎧</div>
+        <h3>Zubehör &amp; Beratung</h3>
+        <p>Hüllen, Panzerglas, Ladekabel und mehr – plus ehrliche Kaufberatung ohne versteckten Druck.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Why Us ────────────────────────────────────────────────── -->
+  <section id="whyus">
+    <div class="usp-grid">
+      <div>
+        <div class="section-head reveal">
+          <span class="section-label">Warum OsiTech</span>
+          <h2>Persönlich. Ehrlich. Kompetent.</h2>
+          <p class="section-intro">Als inhabergeführte Werkstatt stehen wir persönlich für jede Reparatur ein.</p>
+        </div>
+
+        <div class="usp-list">
+          <div class="usp-item reveal">
+            <div class="usp-icon">🏆</div>
+            <div>
+              <h4>Qualitätsgarantie</h4>
+              <p>Wir verwenden ausschließlich geprüfte Ersatzteile und stehen hinter unserer Arbeit.</p>
+            </div>
+          </div>
+          <div class="usp-item reveal">
+            <div class="usp-icon">💬</div>
+            <div>
+              <h4>Ehrliche Beratung</h4>
+              <p>Osman berät dich transparent – ohne überteuerte Zusatzleistungen oder versteckte Kosten.</p>
+            </div>
+          </div>
+          <div class="usp-item reveal">
+            <div class="usp-icon">⚡</div>
+            <div>
+              <h4>Schnelle Abwicklung</h4>
+              <p>Viele Reparaturen erledigen wir noch am selben Tag – so stehst du nicht lange ohne dein Gerät.</p>
+            </div>
+          </div>
+          <div class="usp-item reveal">
+            <div class="usp-icon">🤝</div>
+            <div>
+              <h4>Persönlicher Kontakt</h4>
+              <p>Du sprichst direkt mit dem Inhaber – kein Call-Center, keine anonymen Prozesse.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usp-visual reveal">
+        <div class="big-icon">🔧</div>
+        <p>Inhaber &amp; Techniker</p>
+        <strong>Osman Habib El-Molla</strong>
+        <p style="margin-top:1.2rem; font-size:0.88rem;">
+          „Jedes Gerät behandle ich so, als wäre es meins – mit Sorgfalt, Ehrlichkeit und dem Anspruch auf echte Qualität."
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Process ───────────────────────────────────────────────── -->
+  <section id="process">
+    <div class="section-head reveal" style="text-align:center;">
+      <span class="section-label">Ablauf</span>
+      <h2>So läuft deine Reparatur ab</h2>
+      <p class="section-intro" style="margin:0 auto;">Einfach, transparent und ohne Überraschungen.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step reveal">
+        <div class="step-num">📬</div>
+        <h4>Anfrage stellen</h4>
+        <p>Füll das Formular aus oder ruf einfach an – wir antworten prompt.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">🔍</div>
+        <h4>Kostenlose Diagnose</h4>
+        <p>Wir schauen uns dein Gerät an und geben dir einen ehrlichen Kostenvoranschlag.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">🛠️</div>
+        <h4>Reparatur</h4>
+        <p>Nach deiner Freigabe reparieren wir professionell und zügig.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">✅</div>
+        <h4>Abholung</h4>
+        <p>Dein Gerät wird getestet und du holst es wieder ab – fertig!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Repair Request ─────────────────────────────────────────── -->
+  <section id="repair">
+    <div class="section-head reveal" style="text-align:center;">
+      <span class="section-label">Express-Anfrage</span>
+      <h2>Reparaturanfrage stellen</h2>
+      <p class="section-intro" style="margin:0 auto;">Schreib uns kurz – wir melden uns so schnell wie möglich bei dir.</p>
+    </div>
+
+    <div class="form-wrapper reveal">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fname">Dein Name</label>
+          <input type="text" id="fname" placeholder="Max Mustermann" />
+        </div>
+        <div class="form-group">
+          <label for="femail">E-Mail-Adresse</label>
+          <input type="email" id="femail" placeholder="max@beispiel.de" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fmodel">Smartphone-Modell</label>
+          <input type="text" id="fmodel" placeholder="z.B. iPhone 14 Pro" />
+        </div>
+        <div class="form-group">
+          <label for="fcolor">Farbe</label>
+          <input type="text" id="fcolor" placeholder="z.B. Space Gray" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="fproblem">Fehlerbeschreibung</label>
+        <textarea id="fproblem" placeholder="Was ist mit deinem Gerät passiert? Beschreib das Problem kurz..."></textarea>
+      </div>
+
+      <div class="form-note">
+        📎 Wir antworten in der Regel innerhalb weniger Stunden.
+      </div>
+
+      <button class="submit-btn" onclick="submitForm()">Anfrage absenden →</button>
+    </div>
+  </section>
+
+  <!-- ─── Contact ───────────────────────────────────────────────── -->
+  <section id="contact">
+    <div class="contact-grid">
+      <div>
+        <div class="section-head reveal">
+          <span class="section-label">Kontakt</span>
+          <h2>Komm einfach vorbei</h2>
+          <p class="section-intro">Wir freuen uns auf deinen Besuch in Rhede.</p>
+        </div>
+
+        <div class="contact-card reveal">
+          <div class="contact-card-icon">📍</div>
+          <div>
+            <h4>Adresse</h4>
+            <p>Deichstraße 5, 46414 Rhede</p>
+          </div>
+        </div>
+
+        <div class="contact-card reveal">
+          <div class="contact-card-icon">📞</div>
+          <div>
+            <h4>Telefon</h4>
+            <p><a href="tel:01575644106">0157 5644 106</a></p>
+          </div>
+        </div>
+
+        <div class="contact-card reveal">
+          <div class="contact-card-icon">✉️</div>
+          <div>
+            <h4>E-Mail</h4>
+            <p><a href="mailto:info@osi-tech.de">info@osi-tech.de</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-box reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        <div class="map-placeholder">
+          <strong>OsiTech Smart Repair</strong>
+          Deichstraße 5, 46414 Rhede
+        </div>
+        <a class="map-link" href="https://maps.google.com/?q=Deichstra%C3%9Fe+5,+46414+Rhede" target="_blank" rel="noopener">
+          In Google Maps öffnen
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-logo">OsiTech Smart Repair</div>
+    <p>Inhabergeführte Werkstatt für Smartphones, Tablets &amp; mobile Geräte</p>
+    <div class="footer-links">
+      <a href="#home">Start</a>
+      <a href="#services">Leistungen</a>
+      <a href="#repair">Anfrage</a>
+      <a href="#contact">Kontakt</a>
+      <a href="mailto:info@osi-tech.de">Impressum</a>
+    </div>
+    <p style="margin-top:1rem;">© 2026 OsiTech Smart Repair · Osman Habib El-Molla · Deichstraße 5, 46414 Rhede</p>
+  </footer>
+
+  <!-- ─── Toast ─────────────────────────────────────────────────── -->
+  <div class="toast" id="toast">✅ Anfrage erfolgreich gesendet! Wir melden uns bald.</div>
+
+  <!-- ─── JS ────────────────────────────────────────────────────── -->
+  <script>
+    // Burger menu
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+
+    // Close menu on link click
+    document.querySelectorAll('.nav-links a').forEach(a =>
+      a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'))
+    );
+
+    // Navbar scroll shadow
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').style.boxShadow =
+        window.scrollY > 20 ? '0 4px 30px rgba(0,0,0,0.5)' : 'none';
+    });
+
+    // Intersection observer for reveal animations
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          // stagger children
+          e.target.querySelectorAll && null;
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.transitionDelay = (i % 4) * 0.08 + 's';
+      observer.observe(el);
+    });
+
+    // Form submit
+    function submitForm() {
+      const name    = document.getElementById('fname').value.trim();
+      const email   = document.getElementById('femail').value.trim();
+      const model   = document.getElementById('fmodel').value.trim();
+      const problem = document.getElementById('fproblem').value.trim();
+
+      if (!name || !email || !model || !problem) {
+        alert('Bitte füll alle Pflichtfelder aus.');
+        return;
+      }
+
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+
+      // Reset form
+      ['fname','femail','fmodel','fcolor','fproblem'].forEach(id =>
+        document.getElementById(id).value = ''
+      );
+    }
+  </script>
+</body>
+</html>
